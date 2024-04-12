@@ -1,0 +1,9 @@
+Metadata-Version: 2.1
+Name: course-eval
+Version: 0.1
+Summary: This package provides tools for analyzing and visualizing course evaluations.
+Home-page: https://github.com/AmeliaHuang325/course_eval
+Author: Shuyang Huang
+Author-email: huangsy0325@gmail.com
+License: MIT
+Keywords: course evaluation,education,data analysis

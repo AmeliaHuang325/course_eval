@@ -1,0 +1,9 @@
+README.md
+setup.py
+course_eval/__init__.py
+course_eval/analysis.py
+course_eval/plotting.py
+course_eval.egg-info/PKG-INFO
+course_eval.egg-info/SOURCES.txt
+course_eval.egg-info/dependency_links.txt
+course_eval.egg-info/top_level.txt
