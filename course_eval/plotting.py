@@ -278,8 +278,6 @@ def plot_funnel_diagram_no_program(num_enrollment_course, filtered_pre_test, fil
 
     # Show the plot
     plt.tight_layout()
-    print("Funnel Diagram")
-    plt.show()
 
 ## Generate Funnel Diagram with Enrollment in the program
 def plot_funnel_diagram_with_program(num_enrollment_program, num_enrollment_course, filtered_pre_test, filtered_post_test, filtered_eval_info):
