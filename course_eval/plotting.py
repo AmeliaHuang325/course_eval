@@ -581,7 +581,7 @@ def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_aft
         plt.text(bar.get_x() + bar.get_width() / 2, count, f'{int(count)}', ha='center', va='bottom', fontsize=10)
 
 ## Generate a diagram for individual KSA improvement
-def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_col_after, na_values=None):
+def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_col_after, eval_value, na_values=None):
     # Default NA values if none provided
     if na_values is None:
         na_values = ['nan', 'na', 'not applicable', '']
@@ -592,54 +592,54 @@ def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_co
     filtered_eval_info[eval_col_before] = filtered_eval_info[eval_col_before].astype(str).str.lower().replace(na_values, np.nan)
     filtered_eval_info[eval_col_after] = filtered_eval_info[eval_col_after].astype(str).str.lower().replace(na_values, np.nan)
 
-    # Drop rows with NaNs in the specified EVAL columns
-    filtered_eval_info.dropna(subset=[eval_col_before, eval_col_after], inplace=True)
+    # Ensure all entries are strings before mapping
+    filtered_eval_info[eval_col_before] = filtered_eval_info[eval_col_before].astype(str)
+    filtered_eval_info[eval_col_after] = filtered_eval_info[eval_col_after].astype(str)
 
     # Map the values to numeric labels
     value_to_label = {'none': '1', 'little': '2', 'basic': '3', 'intermediate': '4', 'advanced': '5'}
     
     # Use .loc to ensure changes are made in place on the DataFrame
-    filtered_eval_info.loc[:, eval_col_before] = pd.to_numeric(filtered_eval_info[eval_col_before].map(value_to_label))
-    filtered_eval_info.loc[:, eval_col_after] = pd.to_numeric(filtered_eval_info[eval_col_after].map(value_to_label))
+    filtered_eval_info.loc[:, eval_col_before] = pd.to_numeric(filtered_eval_info[eval_col_before].map(value_to_label), errors='coerce')
+    filtered_eval_info.loc[:, eval_col_after] = pd.to_numeric(filtered_eval_info[eval_col_after].map(value_to_label), errors='coerce')
 
-    # Get unique values of eval_col_before sorted in descending order
-    unique_values = sorted(filtered_eval_info[eval_col_before].unique(), reverse=True)
+    # Drop rows with NaNs in the mapped numeric values
+    filtered_eval_info.dropna(subset=[eval_col_before, eval_col_after], inplace=True)
+
+    # Filter the data based on the specified eval_value
+    data_filtered = filtered_eval_info[filtered_eval_info[eval_col_before] == eval_value]
+
+    if data_filtered.empty:
+        print(f"No data available for Before Level = {eval_value}")
+        return None
 
     # Define the number of columns in the grid
     num_columns = 6
 
-    for eval_value in unique_values:
-        data_filtered = filtered_eval_info[filtered_eval_info[eval_col_before] == eval_value]
+    # Calculate the number of rows needed
+    num_rows = len(data_filtered) // num_columns + (len(data_filtered) % num_columns > 0)
 
-        if data_filtered.empty:
-            print(f"No data available for Before Level = {eval_value}")
-            continue
+    # Create subplots
+    fig, axes = plt.subplots(num_rows, num_columns, figsize=(15, max(2.5, num_rows * 2.5)))
 
-        num_rows = len(data_filtered) // num_columns + (len(data_filtered) % num_columns > 0)
-        fig, axes = plt.subplots(num_rows, num_columns, figsize=(15, max(2.5, num_rows * 2.5)))
+    if num_rows * num_columns > 1:
+        axes = axes.flatten()
+    else:
+        axes = [axes]
 
-        if num_rows * num_columns > 1:
-            axes = axes.flatten()
-        else:
-            axes = [axes]
+    for index, row in enumerate(data_filtered.itertuples()):
+        ax = axes[index]
+        ax.bar('Before', getattr(row, eval_col_before), color='#9dcaea', alpha=0.8)
+        ax.bar('After', getattr(row, eval_col_after), color='#2980B9')
+        ax.plot(['Before', 'After'], [getattr(row, eval_col_before), getattr(row, eval_col_after)], 'ro-', linewidth=2)
+        ax.set_ylim(1, 5)
+        ax.set_yticks([1, 2, 3, 4, 5])
+        ax.grid(False)
 
-        print(f'Before Level = {eval_value}')
+    for i in range(index + 1, num_rows * num_columns):
+        axes[i].axis('off')
 
-        for index, row in enumerate(data_filtered.itertuples()):
-            ax = axes[index]
-            ax.bar('Before', getattr(row, eval_col_before), color='#9dcaea', alpha=0.8)
-            ax.bar('After', getattr(row, eval_col_after), color='#2980B9')
-            ax.plot(['Before', 'After'], [getattr(row, eval_col_before), getattr(row, eval_col_after)], 'ro-', linewidth=2)
-            ax.set_ylim(1, 5)
-            ax.set_yticks([1, 2, 3, 4, 5])
-            ax.grid(False)
-
-        for i in range(index + 1, num_rows * num_columns):
-            axes[i].axis('off')
-
-        plt.tight_layout()
-        plt.show()
-
+    plt.tight_layout()
 
 
 
