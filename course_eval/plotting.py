@@ -154,7 +154,6 @@ def plot_test_false_rates(data, text_size=10):
     annotate_bars(rects2, ax)
 
     plt.tight_layout()  # Adjust layout to fit everything
-    plt.show()
 
 ## Functions to create pie charts for specific question
 # Function to replace labels
@@ -206,30 +205,28 @@ def create_pie_chart(data_series, title, color_scheme, ax):
     ax.set_title(title, loc='left', fontweight='bold', fontsize=12)
 
 # Function to plot the pre-test and post-test pie charts
-def plot_pre_post_pie_charts(column_suffixes, filtered_pre_test, filtered_post_test):
-    for column_suffix in column_suffixes:
-        # Creating a figure with two subplots side by side
-        fig, axs = plt.subplots(1, 2, figsize=(12, 10))
+def plot_pre_post_pie_charts(column_suffix, filtered_pre_test, filtered_post_test):
+    # Creating a figure with two subplots side by side
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
 
-        # Adjust the space between the two pie charts
-        plt.subplots_adjust(wspace=0.5)
+     # Adjust the space between the two pie charts and the overall layout
+    plt.subplots_adjust(left=0, right=0.95, wspace=0.2)  
 
-        # Process the data for pre-test and post-test
-        pre_column = 'PRE_' + column_suffix
-        post_column = 'POST_' + column_suffix
-        filtered_pre_test[pre_column] = filtered_pre_test[pre_column].apply(replace_label)
-        filtered_post_test[post_column] = filtered_post_test[post_column].apply(replace_label)
+    # Process the data for pre-test and post-test
+    pre_column = 'PRE_' + column_suffix
+    post_column = 'POST_' + column_suffix
+    filtered_pre_test[pre_column] = filtered_pre_test[pre_column].apply(replace_label)
+    filtered_post_test[post_column] = filtered_post_test[post_column].apply(replace_label)
 
-        # Define color schemes
-        colors_pre = ['#fffecf', '#c5e59e', '#80c57e', '#338347']
-        colors_post = ['#f1eef7', '#d6b6d7', '#da6aae', '#c82c56']
+    # Define color schemes
+    colors_pre = ['#fffecf', '#c5e59e', '#80c57e', '#338347']
+    colors_post = ['#f1eef7', '#d6b6d7', '#da6aae', '#c82c56']
 
-        # Plot for pre-test
-        create_pie_chart(filtered_pre_test[pre_column], f'Pre-Test Q{column_suffix}', colors_pre, axs[0])
+    # Plot for pre-test
+    create_pie_chart(filtered_pre_test[pre_column], f'Pre-Test Q{column_suffix}', colors_pre, axs[0])
 
-        # Plot for post-test
-        create_pie_chart(filtered_post_test[post_column], f'Post-Test Q{column_suffix}', colors_post, axs[1])
-        plt.show()
+    # Plot for post-test
+    create_pie_chart(filtered_post_test[post_column], f'Post-Test Q{column_suffix}', colors_post, axs[1])
 
 ## Generate Funnel Diagram without Enrollment in the program
 def plot_funnel_diagram_no_program(num_enrollment_course, filtered_pre_test, filtered_post_test, filtered_eval_info):
@@ -327,8 +324,6 @@ def plot_funnel_diagram_with_program(num_enrollment_program, num_enrollment_cour
 
     # Show the plot
     plt.tight_layout()
-    print("Funnel Diagram with Program Enrollment")
-    plt.show()
 
 ## Generate Sankey Diagram for the Participant Flow
 def clean_course_status(df):
@@ -427,8 +422,6 @@ def plot_participant_drop_between_tests_pre(filtered_pre_test, filtered_post_tes
     # Make the y-axis labels integers
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
 
-    plt.show()
-
 ## Generate a diagram for Compound Sentiment Score
 def plot_compound_sentiment_scores(data, column):
     # Create the figure and axis object
@@ -490,12 +483,9 @@ def plot_compound_sentiment_scores(data, column):
     # Set x-axis label
     ax.set_xlabel('Scores')
 
-    # Print 25 and 75 percentile
-    print("Compound Sentiment Score")
-    print("25th percentile: ", percentile_25, "75th percentile: ", percentile_75)
+    # Tight layout for better spacing
+    plt.tight_layout()
 
-    # Show the plot
-    plt.show()
 
 ## Generate a diagram for KSA distribution
 def plot_ksa_distribution(filtered_eval_info, eval_col_before, eval_col_after, na_values=None):
@@ -543,8 +533,6 @@ def plot_ksa_distribution(filtered_eval_info, eval_col_before, eval_col_after, n
     for bar, count in zip(bars2, ksa_result_df['After']):
         ax.text(bar.get_x() + bar.get_width() / 2, count, str(count), ha='center', va='bottom')
 
-    plt.show()
-
 ## Generate a diagram for KSA level difference
 def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_after):
     # Create a dictionary to map values to labels
@@ -591,8 +579,6 @@ def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_aft
     # Annotate each bar with its count
     for bar, count in zip(bars, ksa_diff_df['Number of Participants']):
         plt.text(bar.get_x() + bar.get_width() / 2, count, f'{int(count)}', ha='center', va='bottom', fontsize=10)
-
-    plt.show()
 
 ## Generate a diagram for individual KSA improvement
 def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_col_after, na_values=None):
