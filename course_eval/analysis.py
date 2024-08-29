@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import numpy as np
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 ## Filter out and clean the data needed
@@ -94,3 +95,24 @@ def process_sentiment(data, column, score_type):
     
     # Sort the DataFrame by sentiment scores
     return df.sort_values(by=f'{score_type} sentiment score', ascending=False)
+
+## Calculate the 25th percentile of sentiment analysis
+def plot_25th_percentile(data, column):
+    # Ensure data is sorted
+    sorted_data = data[column].dropna().sort_values()
+    
+    # Calculate the 25th percentile
+    percentile_25 = np.percentile(sorted_data, 25)
+    
+    return percentile_25
+
+## Calculate the 75th percentile of sentiment analysis
+def plot_75th_percentile(data, column):
+    # Ensure data is sorted
+    sorted_data = data[column].dropna().sort_values()
+    
+    # Calculate the 75th percentile
+    percentile_75 = np.percentile(sorted_data, 75)
+    
+    return percentile_75
+

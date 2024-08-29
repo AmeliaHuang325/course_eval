@@ -1,2 +1,2 @@
-from .analysis import filter_max_attempts, avg_score, rename_columns_with_info_within_parentheses, false_counts_false_rate, process_sentiment
+from .analysis import filter_max_attempts, avg_score, rename_columns_with_info_within_parentheses, false_counts_false_rate, process_sentiment, plot_25th_percentile, plot_75th_percentile
 from .plotting import plot_test_score_distribution, plot_test_false_rates, replace_label, create_pie_chart, plot_pre_post_pie_charts, plot_funnel_diagram_no_program, plot_funnel_diagram_with_program, clean_course_status, plot_participant_flow_sankey, plot_participant_drop_between_tests_pre, plot_compound_sentiment_scores, plot_ksa_distribution, plot_ksa_level_differences, plot_individual_ksa_improvement
