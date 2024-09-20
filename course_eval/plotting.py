@@ -395,9 +395,9 @@ def plot_participant_drop_between_tests_pre(filtered_pre_test, filtered_post_tes
     drop_bars = ax.bar(count_drop.index, count_drop.values, width=bar_width, label='Drop Between the Tests', color='#BF5254')
     both_bars = ax.bar(count_both.index, count_both.values, bottom=count_drop.values, width=bar_width, label='Attend Both Tests', color='#94AACD')
 
-    ax.set_xlabel('Score Percentage', fontweight='bold')
+    ax.set_xlabel('Pre-test Score', fontweight='bold')
     ax.set_ylabel('Number of Participants', fontweight='bold')
-    ax.set_title('Participants by Score Percentage', fontweight='bold')
+    ax.set_title('Participants by Pre-Test Score Percentage', fontweight='bold')
     plt.xticks(all_scores)
     plt.legend()
 

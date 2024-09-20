@@ -106,6 +106,17 @@ def plot_25th_percentile(data, column):
     
     return percentile_25
 
+## Calculate the Median Sentiment Score
+def plot_median_sentiment_score(data, column):
+    # Ensure data is sorted
+    sorted_data = data[column].dropna().sort_values()
+    
+    # Calculate the median (50th percentile)
+    median_score = np.percentile(sorted_data, 50)
+    
+    return median_score
+
+
 ## Calculate the 75th percentile of sentiment analysis
 def plot_75th_percentile(data, column):
     # Ensure data is sorted
