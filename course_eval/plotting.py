@@ -26,7 +26,7 @@ def plot_test_score_distribution(filtered_test, test_questions_no):
 
     # Using seaborn for a nicer looking plot
     sns.set(style="whitegrid")
-    plt.figure(figsize=(10, 5))
+    fig = plt.figure(figsize=(10, 5))
     
     # Calculate the score increment per question
     score_increment = 100 / test_questions_no
@@ -88,9 +88,9 @@ def plot_test_score_distribution(filtered_test, test_questions_no):
     info_text_y = plt.ylim()[0] - (plt.ylim()[1] - plt.ylim()[0]) * 0.2
 
     # Add text for high score, low score, and std dev
-    plt.text(plt.xlim()[1] / 2, info_text_y, f'Lowest Score: {low_score}%, Highest Score: {high_score}%', horizontalalignment='center', alpha=alpha_value, fontsize=9)
+    plt.text(plt.xlim()[1] / 2, info_text_y, f'Lowest Score: {low_score:.1f}%, Highest Score: {high_score:.1f}%', horizontalalignment='center', alpha=alpha_value, fontsize=9)
 
-    return plt
+    return fig
 
 ## Generate a diagram for the pre-test and post-test false rate by question
 def plot_test_false_rates(data, text_size=10):
@@ -154,6 +154,7 @@ def plot_test_false_rates(data, text_size=10):
     annotate_bars(rects2, ax)
 
     plt.tight_layout()  # Adjust layout to fit everything
+    return fig
 
 ## Functions to create pie charts for specific question
 # Function to replace labels
@@ -215,18 +216,19 @@ def plot_pre_post_pie_charts(column_suffix, filtered_pre_test, filtered_post_tes
     # Process the data for pre-test and post-test
     pre_column = 'PRE_' + column_suffix
     post_column = 'POST_' + column_suffix
-    filtered_pre_test[pre_column] = filtered_pre_test[pre_column].apply(replace_label)
-    filtered_post_test[post_column] = filtered_post_test[post_column].apply(replace_label)
+    pre_answers = filtered_pre_test[pre_column].apply(replace_label)
+    post_answers = filtered_post_test[post_column].apply(replace_label)
 
     # Define color schemes
     colors_pre = ['#fffecf', '#c5e59e', '#80c57e', '#338347']
     colors_post = ['#f1eef7', '#d6b6d7', '#da6aae', '#c82c56']
 
     # Plot for pre-test
-    create_pie_chart(filtered_pre_test[pre_column], f'Pre-Test Q{column_suffix}', colors_pre, axs[0])
+    create_pie_chart(pre_answers, f'Pre-Test Q{column_suffix}', colors_pre, axs[0])
 
     # Plot for post-test
-    create_pie_chart(filtered_post_test[post_column], f'Post-Test Q{column_suffix}', colors_post, axs[1])
+    create_pie_chart(post_answers, f'Post-Test Q{column_suffix}', colors_post, axs[1])
+    return fig
 
 ## Generate Funnel Diagram without Enrollment in the program
 def plot_funnel_diagram_no_program(num_enrollment_course, filtered_pre_test, filtered_post_test, filtered_eval_info):
@@ -273,8 +275,8 @@ def plot_funnel_diagram_no_program(num_enrollment_course, filtered_pre_test, fil
     # Invert the y-axis so the largest bar is on top
     ax.invert_yaxis()
 
-    # Show the plot
     plt.tight_layout()
+    return fig
 
 ## Generate Funnel Diagram with Enrollment in the program
 def plot_funnel_diagram_with_program(num_enrollment_program, num_enrollment_course, filtered_pre_test, filtered_post_test, filtered_eval_info):
@@ -322,8 +324,8 @@ def plot_funnel_diagram_with_program(num_enrollment_program, num_enrollment_cour
     # Invert the y-axis so the largest bar is on top
     ax.invert_yaxis()
 
-    # Show the plot
     plt.tight_layout()
+    return fig
 
 ## Generate Sankey Diagram for the Participant Flow
 def clean_course_status(df):
@@ -370,7 +372,7 @@ def plot_participant_flow_sankey(enrollment_program, enrollment_course, total_re
         font_size=17,
         height=600
     )
-    fig.show()
+    return fig
 
 ## Generate a diagram to see whether the pre-test score determines the drop between pre-test and post-test
 def plot_participant_drop_between_tests_pre(filtered_pre_test, filtered_post_test):
@@ -421,6 +423,7 @@ def plot_participant_drop_between_tests_pre(filtered_pre_test, filtered_post_tes
 
     # Make the y-axis labels integers
     ax.yaxis.set_major_locator(ticker.MaxNLocator(integer=True))
+    return fig
 
 ## Generate a diagram for Compound Sentiment Score
 def plot_compound_sentiment_scores(data, column):
@@ -435,8 +438,11 @@ def plot_compound_sentiment_scores(data, column):
     sorted_data = data[column].dropna().sort_values()
 
     # Create the boxplot with customized flierprops and medianprops
-    boxplot_elements = ax.boxplot(sorted_data, vert=False, whis=[5, 95],
-                                  showfliers=True, patch_artist=True, flierprops=flierprops, medianprops=medianprops)
+    boxplot_kwargs = dict(whis=[5, 95], showfliers=True, patch_artist=True, flierprops=flierprops, medianprops=medianprops)
+    try:
+        boxplot_elements = ax.boxplot(sorted_data, orientation='horizontal', **boxplot_kwargs)  # matplotlib >= 3.10
+    except TypeError:
+        boxplot_elements = ax.boxplot(sorted_data, vert=False, **boxplot_kwargs)
 
     # Calculate the 25th and 75th percentiles
     percentile_25 = np.percentile(sorted_data, 25)
@@ -485,6 +491,7 @@ def plot_compound_sentiment_scores(data, column):
 
     # Tight layout for better spacing
     plt.tight_layout()
+    return fig
 
 
 ## Generate a diagram for KSA distribution
@@ -497,8 +504,9 @@ def plot_ksa_distribution(filtered_eval_info, eval_col_before, eval_col_after, n
     if na_values is None:
         na_values = ['nan', 'na', 'not applicable']
     
-    filtered_eval_info[eval_col_before] = filtered_eval_info[eval_col_before].astype(str).str.lower().replace(na_values, np.nan)
-    filtered_eval_info[eval_col_after] = filtered_eval_info[eval_col_after].astype(str).str.lower().replace(na_values, np.nan)
+    filtered_eval_info = filtered_eval_info.copy()
+    filtered_eval_info[eval_col_before] = filtered_eval_info[eval_col_before].astype(str).str.strip().str.lower().replace(na_values, np.nan)
+    filtered_eval_info[eval_col_after] = filtered_eval_info[eval_col_after].astype(str).str.strip().str.lower().replace(na_values, np.nan)
 
     # Copy to a new DataFrame and drop rows with NaNs in the specified EVAL columns
     filtered_eval_info_2 = filtered_eval_info.dropna(subset=[eval_col_before, eval_col_after])
@@ -533,6 +541,8 @@ def plot_ksa_distribution(filtered_eval_info, eval_col_before, eval_col_after, n
     for bar, count in zip(bars2, ksa_result_df['After']):
         ax.text(bar.get_x() + bar.get_width() / 2, count, str(count), ha='center', va='bottom')
 
+    return fig
+
 ## Generate a diagram for KSA level difference
 def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_after):
     # Create a dictionary to map values to labels
@@ -549,7 +559,7 @@ def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_aft
 
     # Map the values to labels and convert to numeric
     for col in [eval_col_before, eval_col_after]:
-        data_mapped[col] = pd.to_numeric(data_mapped[col].map(value_to_label))
+        data_mapped[col] = pd.to_numeric(data_mapped[col].astype(str).str.strip().str.lower().map(value_to_label))
 
     # Calculate the difference and store it in a new column
     data_mapped['Difference'] = data_mapped[eval_col_after] - data_mapped[eval_col_before]
@@ -559,7 +569,7 @@ def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_aft
     ksa_diff_df.columns = ['Difference', 'Number of Participants']
 
     # Plot the data
-    plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(10, 6))
 
     # Apply custom colors based on the difference value
     colors = ['r' if x < 0 else '#F8C471' for x in ksa_diff_df['Difference']]
@@ -570,7 +580,12 @@ def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_aft
     plt.grid(False)
 
     # Replace x-axis labels with custom labels indicating level change
-    custom_labels = [f"{int(level)} level increase" if level != 0 else "No change" for level in ksa_diff_df['Difference']]
+    custom_labels = [
+        "No change" if level == 0
+        else f"{int(level)} level increase" if level > 0
+        else f"{int(-level)} level decrease"
+        for level in ksa_diff_df['Difference']
+    ]
     plt.xticks(ksa_diff_df['Difference'], custom_labels)
 
     # Add title
@@ -579,6 +594,8 @@ def plot_ksa_level_differences(filtered_eval_info, eval_col_before, eval_col_aft
     # Annotate each bar with its count
     for bar, count in zip(bars, ksa_diff_df['Number of Participants']):
         plt.text(bar.get_x() + bar.get_width() / 2, count, f'{int(count)}', ha='center', va='bottom', fontsize=10)
+
+    return fig
 
 ## Generate a diagram for individual KSA improvement
 def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_col_after, eval_value, na_values=None):
@@ -589,8 +606,8 @@ def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_co
     filtered_eval_info = filtered_eval_info.copy()
 
     # Convert columns to string, lowercase, and replace specified values with np.nan
-    filtered_eval_info[eval_col_before] = filtered_eval_info[eval_col_before].astype(str).str.lower().replace(na_values, np.nan)
-    filtered_eval_info[eval_col_after] = filtered_eval_info[eval_col_after].astype(str).str.lower().replace(na_values, np.nan)
+    filtered_eval_info[eval_col_before] = filtered_eval_info[eval_col_before].astype(str).str.strip().str.lower().replace(na_values, np.nan)
+    filtered_eval_info[eval_col_after] = filtered_eval_info[eval_col_after].astype(str).str.strip().str.lower().replace(na_values, np.nan)
 
     # Ensure all entries are strings before mapping
     filtered_eval_info[eval_col_before] = filtered_eval_info[eval_col_before].astype(str)
@@ -599,12 +616,11 @@ def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_co
     # Map the values to numeric labels
     value_to_label = {'none': '1', 'little': '2', 'basic': '3', 'intermediate': '4', 'advanced': '5'}
     
-    # Use .loc to ensure changes are made in place on the DataFrame
-    filtered_eval_info.loc[:, eval_col_before] = pd.to_numeric(filtered_eval_info[eval_col_before].map(value_to_label), errors='coerce')
-    filtered_eval_info.loc[:, eval_col_after] = pd.to_numeric(filtered_eval_info[eval_col_after].map(value_to_label), errors='coerce')
+    filtered_eval_info[eval_col_before] = pd.to_numeric(filtered_eval_info[eval_col_before].map(value_to_label), errors='coerce')
+    filtered_eval_info[eval_col_after] = pd.to_numeric(filtered_eval_info[eval_col_after].map(value_to_label), errors='coerce')
 
     # Drop rows with NaNs in the mapped numeric values
-    filtered_eval_info.dropna(subset=[eval_col_before, eval_col_after], inplace=True)
+    filtered_eval_info = filtered_eval_info.dropna(subset=[eval_col_before, eval_col_after])
 
     # Filter the data based on the specified eval_value
     data_filtered = filtered_eval_info[filtered_eval_info[eval_col_before] == eval_value]
@@ -640,6 +656,4 @@ def plot_individual_ksa_improvement(filtered_eval_info, eval_col_before, eval_co
         axes[i].axis('off')
 
     plt.tight_layout()
-
-
-
+    return fig
