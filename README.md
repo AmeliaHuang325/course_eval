@@ -4,7 +4,7 @@ A Python package for analyzing and visualizing **course evaluations from Canvas 
 
 I built it to replace a manual, notebook-per-course workflow with reusable functions. The same analysis now runs on any course export in a few lines.
 
-**See it in action:** the [Course Evaluation Dashboard](https://github.com/AmeliaHuang325/course-eval-dashboard) is an interactive Streamlit app built on this package.
+**See it in action:** the [Course Evaluation Dashboard](https://course-eval-dashboard.streamlit.app/) ([source](https://github.com/AmeliaHuang325/course-eval-dashboard)) is an interactive Streamlit app built on this package.
 
 ## Install
 
